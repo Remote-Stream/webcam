@@ -4,334 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>انتقال تصویر دوربین موبایل | Remote VM Live</title>
-    <meta name="description" content="ابزار آنلاین و رایگان برای انتقال تصویر زنده دوربین موبایل به کامپیوتر از طریق مرورگر با استفاده از کد QR و بدون نیاز به نصب نرم‌افزار.">
+    <meta name="description" content="ابزار آنلاین و رایگان برای انتقال تصویر زنده دوربین موبایل به کامپیوتر با کد QR.">
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <meta property="og:title" content="انتقال تصویر دوربین موبایل | Remote VM Live">
+    <meta property="og:description" content="دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید.">
+    <meta property="og:url" content="https://live.remotevm.ir"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <style>
-        :root {
-            --neon-cyan: #22d3ee;
-            --neon-rose: #fb7185;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: #0f172a; /* slate-900 */
-            color: #cbd5e1; /* slate-300 */
-        }
-
-        .btn-neon {
-            position: relative;
-            display: inline-flex;
-            padding: 1rem 2rem;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: bold;
-            font-size: 1rem;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            transition: all 0.3s ease-in-out;
-            background-color: transparent;
-            border: 2px solid;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-        
-        .btn-neon-cyan {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
-            box-shadow: 0 0 5px var(--neon-cyan), 0 0 5px var(--neon-cyan) inset;
-            text-shadow: 0 0 5px var(--neon-cyan);
-        }
-
-        .btn-neon-cyan:hover {
-            color: #0f172a;
-            background-color: var(--neon-cyan);
-            box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-        }
-        
-        .btn-neon-rose {
-            border-color: var(--neon-rose);
-            color: var(--neon-rose);
-            box-shadow: 0 0 5px var(--neon-rose), 0 0 5px var(--neon-rose) inset;
-            text-shadow: 0 0 5px var(--neon-rose);
-        }
-
-        .btn-neon-rose:hover {
-            color: #0f172a;
-            background-color: var(--neon-rose);
-            box-shadow: 0 0 20px var(--neon-rose), 0 0 40px var(--neon-rose);
-        }
-
-        #qrcode-container img {
-            margin: auto;
-            border-radius: 1rem;
-            border: 4px solid #334155; /* slate-700 */
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="overflow-x-hidden">
+<body>
     
     <header>
-        <button id="menu-toggle" class="fixed top-5 right-5 z-50 h-12 w-12 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-700 text-cyan-400 text-xl flex items-center justify-center transition-colors hover:bg-slate-700">
-            <i id="menu-icon" class="fas fa-bars"></i>
+        <button id="menu-toggle" class="menu-toggle" aria-label="باز کردن منو">
+            <i id="menu-icon" class="fas fa-bars" aria-hidden="true"></i>
         </button>
-        <div id="menu-overlay" class="fixed inset-0 bg-black/60 z-30 transition-opacity opacity-0 hidden"></div>
-        <nav id="menu-panel" class="fixed top-0 right-0 h-full w-72 bg-slate-900 border-r border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out">
-            <div class="p-6">
-                <h2 class="text-2xl font-bold text-white mb-8 border-b border-slate-700 pb-4">منو</h2>
-                <ul class="flex flex-col space-y-2">
-                    <li><a href="https://remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded-lg p-4 transition-all"><i class="fas fa-home w-6 text-center"></i>خانه</a></li>
-                    <li><a href="https://call.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded-lg p-4 transition-all"><i class="fas fa-video w-6 text-center"></i>تماس تصویری</a></li>
-                    <li><a href="https://about.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded-lg p-4 transition-all"><i class="fas fa-info-circle w-6 text-center"></i>درباره ما</a></li>
-                    <li><a href="https://room.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded-lg p-4 transition-all"><i class="fas fa-users-cog w-6 text-center"></i>پنل حرفه ای</a></li>
+        <div id="menu-overlay" class="menu-overlay hidden opacity-0"></div>
+        <nav id="menu-panel" class="menu-panel">
+            <div class="menu-content">
+                <h2>منو</h2>
+                <ul>
+                    <li><a href="https://remotevm.ir" target="_blank"><i class="fas fa-home"></i>خانه</a></li>
+                    <li><a href="https://call.remotevm.ir" target="_blank"><i class="fas fa-video"></i>تماس تصویری</a></li>
+                    <li><a href="https://about.remotevm.ir" target="_blank"><i class="fas fa-info-circle"></i>درباره ما</a></li>
+                    <li><a href="https://room.remotevm.ir" target="_blank"><i class="fas fa-users-cog"></i>پنل حرفه ای</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
-    <main class="min-h-screen flex flex-col items-center justify-center p-4">
-        
-        <div id="initial-state" class="text-center transition-opacity duration-500" data-aos="zoom-in">
-            <div class="mb-6">
-                <i class="fas fa-mobile-screen-button text-7xl text-cyan-400"></i>
+    <main class="main-container">
+        <div id="initial-state" class="state-container" data-aos="zoom-in">
+            <div class="icon-wrapper">
+                <i class="fas fa-mobile-screen-button"></i>
             </div>
-            <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4">انتقال تصویر دوربین موبایل</h1>
-            <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
-                دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید.
-            </p>
-            <button id="startButton" class="btn-neon btn-neon-cyan text-lg py-4">
+            <h1>انتقال تصویر دوربین موبایل</h1>
+            <p>دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید.</p>
+            <button id="startButton" class="btn-neon btn-neon-cyan">
                 <i class="fas fa-play"></i>
                 <span>Start</span>
- </span>
             </button>
         </div>
 
-        <div id="qr-state" class="hidden w-full max-w-4xl transition-opacity duration-500">
-            <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 md:p-10 text-center">
-                <h2 class="text-2xl md:text-3xl font-bold text-white mb-6">مرحله ۱: اسکن کد QR</h2>
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div class="space-y-4" data-aos="fade-left">
-                        <div id="qrcode-container" class="p-4 bg-white rounded-2xl inline-block shadow-lg">
-                           </div>
-                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <button id="copy-link-button" class="btn-neon btn-neon-cyan w-full sm:w-auto flex-1">
-                                <i class="fas fa-copy"></i>
-                                <span id="copy-link-text">کپی لینک</span>
-                            </button>
-                            <button id="reset-button" class="btn-neon btn-neon-rose w-full sm:w-auto flex-1">
-                                <i class="fas fa-redo"></i>
-                                <span>شروع مجدد</span>
-                            </button>
+        <div id="qr-state" class="state-container card hidden" data-aos="fade-up">
+            <h2>مرحله ۱: اسکن کد QR</h2>
+            <div class="qr-grid">
+                <div class="qr-code-section" data-aos="fade-left">
+                    <div id="qrcode-container-wrapper">
+                        <div id="qrcode-container"></div>
+                    </div>
+                    <div class="button-group">
+                        <button id="copy-link-button" class="btn-neon btn-neon-cyan">
+                            <i class="fas fa-copy"></i>
+                            <span id="copy-link-text">کپی لینک</span>
+                        </button>
+                        <button id="reset-button" class="btn-neon btn-neon-rose">
+                            <i class="fas fa-redo"></i>
+                            <span>شروع مجدد</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="instructions-section" data-aos="fade-right">
+                    <h3>دستورالعمل اتصال:</h3>
+                    <div class="instruction-item">
+                        <i class="fas fa-qrcode"></i>
+                        <div>
+                            <h4>۱. اسکن کد QR</h4>
+                            <p class="small-text">کد QR مقابل را با دوربین موبایل خود اسکن کرده و لینک باز شده را دنبال کنید.</p>
                         </div>
                     </div>
-                    <div class="text-right space-y-4" data-aos="fade-right">
-                        <h3 class="text-xl font-semibold text-white" style="color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan);">دستورالعمل اتصال:</h3>
-                        <div class="flex items-start gap-4">
-                            <div class="text-cyan-400 text-2xl pt-1"><i class="fas fa-qrcode"></i></div>
-                            <div>
-                                <h4 class="font-bold text-slate-200">۱. اسکن کد QR</h4>
-                                <p class="text-slate-400 text-sm">کد QR مقابل را با دوربین موبایل خود اسکن کرده و لینک باز شده را دنبال کنید.</p>
-                            </div>
+                    <div class="instruction-item">
+                        <i class="fas fa-camera"></i>
+                        <div>
+                            <h4>۲. اجازه دسترسی</h4>
+                            <p class="small-text">در صفحه‌ای که روی موبایل شما باز می‌شود، اجازه دسترسی به دوربین و میکروفون را بدهید.</p>
                         </div>
-                        <div class="flex items-start gap-4">
-                            <div class="text-cyan-400 text-2xl pt-1"><i class="fas fa-camera"></i></div>
-                            <div>
-                                <h4 class="font-bold text-slate-200">۲. اجازه دسترسی</h4>
-                                <p class="text-slate-400 text-sm">در صفحه‌ای که روی موبایل شما باز می‌شود، اجازه دسترسی به دوربین و میکروفون را بدهید.</p>
-                            </div>
-                        </div>
-                         <div class="flex items-start gap-4">
-                            <div class="text-cyan-400 text-2xl pt-1 animate-pulse"><i class="fas fa-wifi"></i></div>
-                            <div>
-                                <h4 class="font-bold text-slate-200">۳. در حال اتصال...</h4>
-                                <p class="text-slate-400 text-sm">منتظر بمانید. تصویر دوربین شما به زودی در کادر پایین نمایش داده خواهد شد.</p>
-                            </div>
+                    </div>
+                    <div class="instruction-item">
+                        <i class="fas fa-wifi animate-pulse"></i>
+                        <div>
+                            <h4>۳. در حال اتصال...</h4>
+                            <p class="small-text">منتظر بمانید. تصویر دوربین شما به زودی در کادر پایین نمایش داده خواهد شد.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div id="video-wrapper" class="hidden w-full max-w-5xl mt-10 transition-opacity duration-500">
-             <div id="video-container" class="aspect-video bg-black rounded-2xl overflow-hidden border-4 border-slate-700 shadow-2xl shadow-black/50" data-aos="zoom-in-up">
-                <iframe id="remoteVideo" allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;" class="w-full h-full border-0"></iframe>
+        <div id="video-wrapper" class="video-wrapper hidden" data-aos="zoom-in-up">
+            <div id="video-container" class="video-container">
+                <iframe id="remoteVideo" allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;"></iframe>
             </div>
-            <div id="video-controls" class="mt-4 flex flex-wrap items-center justify-center gap-3" data-aos="fade-up" data-aos-delay="200">
-                 <button id="fullscreen-btn" class="btn-neon btn-neon-cyan">
+            <div id="video-controls" class="video-controls">
+                <button id="fullscreen-btn" class="btn-neon btn-neon-cyan">
                     <i class="fas fa-expand"></i><span>تمام‌صفحه</span>
                 </button>
-                 <button id="obs-btn" class="btn-neon btn-neon-cyan">
+                <button id="obs-btn" class="btn-neon btn-neon-cyan">
                     <i class="fab fa-obs"></i><span id="obs-btn-text">کپی لینک OBS</span>
                 </button>
             </div>
         </div>
-
     </main>
     
-    <footer class="text-center py-6 text-slate-500 text-sm">
-        <p>سرویس اختصاصی <a href="https://remotevm.ir" class="text-cyan-400 hover:underline" target="_blank">RemoteVM</a></p>
+    <footer>
+        <p>سرویس اختصاصی <a href="https://remotevm.ir" target="_blank">RemoteVM</a></p>
     </footer>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <script>
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 50,
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Menu Elements
-            const menuToggle = document.getElementById('menu-toggle');
-            const menuIcon = document.getElementById('menu-icon');
-            const menuPanel = document.getElementById('menu-panel');
-            const menuOverlay = document.getElementById('menu-overlay');
-
-            // App Elements
-            const startButton = document.getElementById('startButton');
-            const copyButton = document.getElementById('copy-link-button');
-            const copyButtonText = document.getElementById('copy-link-text');
-            const resetButton = document.getElementById('reset-button');
-            const fullscreenButton = document.getElementById('fullscreen-btn');
-            const obsButton = document.getElementById('obs-btn');
-            const obsButtonText = document.getElementById('obs-btn-text');
-            
-            const initialStateDiv = document.getElementById('initial-state');
-            const qrStateDiv = document.getElementById('qr-state');
-            const videoWrapperDiv = document.getElementById('video-wrapper');
-
-            const qrContainer = document.getElementById('qrcode-container');
-            const iframe = document.getElementById('remoteVideo');
-            
-            // State variables
-            let roomId = null;
-            let mobileUrl = '';
-            let viewerUrl = '';
-
-            // --- Menu Logic ---
-            function toggleMenu() {
-                const isActive = menuPanel.classList.contains('translate-x-0');
-                if (isActive) {
-                    menuPanel.classList.remove('translate-x-0');
-                    menuPanel.classList.add('translate-x-full');
-                    menuOverlay.classList.add('opacity-0');
-                    menuOverlay.classList.add('hidden');
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
-                } else {
-                    menuPanel.classList.remove('translate-x-full');
-                    menuPanel.classList.add('translate-x-0');
-                    menuOverlay.classList.remove('hidden');
-                    menuOverlay.classList.remove('opacity-0');
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
-                }
-            }
-
-            menuToggle.addEventListener('click', toggleMenu);
-            menuOverlay.addEventListener('click', toggleMenu);
-
-            // --- App Logic ---
-            function generateRoomId() {
-                return Math.random().toString(36).substring(2, 15);
-            }
-
-            function startSession() {
-                startButton.disabled = true;
-                roomId = generateRoomId();
-                mobileUrl = `https://live.remotevm.ir/?push=${roomId}&webcam&hideheader`;
-                viewerUrl = `https://live.remotevm.ir/?view=${roomId}&autostart&cleanoutput&hideheader`;
-
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: mobileUrl, width: 200, height: 200,
-                    colorDark: '#0f172a', colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-
-                iframe.src = viewerUrl;
-
-                initialStateDiv.classList.add('opacity-0');
-                setTimeout(() => {
-                    initialStateDiv.classList.add('hidden');
-                    qrStateDiv.classList.remove('hidden');
-                    videoWrapperDiv.classList.remove('hidden');
-                    qrStateDiv.classList.add('opacity-100');
-                    videoWrapperDiv.classList.add('opacity-100');
-                    
-                    setTimeout(() => {
-                         videoWrapperDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 500);
-                }, 500);
-            }
-
-            function resetSession() {
-                qrStateDiv.classList.remove('opacity-100');
-                videoWrapperDiv.classList.remove('opacity-100');
-                
-                setTimeout(() => {
-                    qrStateDiv.classList.add('hidden');
-                    videoWrapperDiv.classList.add('hidden');
-                    initialStateDiv.classList.remove('hidden');
-                    initialStateDiv.classList.remove('opacity-0');
-
-                    startButton.disabled = false;
-                    qrContainer.innerHTML = '';
-                    iframe.src = 'about:blank';
-                    roomId = null; mobileUrl = ''; viewerUrl = '';
-                    copyButtonText.innerText = 'کپی لینک';
-                    obsButtonText.innerText = 'کپی لینک OBS';
-                }, 500);
-            }
-            
-            function showFeedback(element, text) {
-                const originalText = element.innerText;
-                element.innerText = text;
-                setTimeout(() => {
-                    element.innerText = originalText;
-                }, 2000);
-            }
-
-            // Event Listeners
-            startButton.addEventListener('click', startSession);
-            resetButton.addEventListener('click', resetSession);
-            
-            copyButton.addEventListener('click', () => {
-                if (!mobileUrl) return;
-                navigator.clipboard.writeText(mobileUrl).then(() => showFeedback(copyButtonText, 'کپی شد!'));
-            });
-
-            obsButton.addEventListener('click', () => {
-                if (!viewerUrl) return;
-                navigator.clipboard.writeText(viewerUrl).then(() => showFeedback(obsButtonText, 'کپی شد!'));
-            });
-
-            fullscreenButton.addEventListener('click', () => {
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) { /* Safari */
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.msRequestFullscreen) { /* IE11 */
-                    iframe.msRequestFullscreen();
-                }
-            });
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>
