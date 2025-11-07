@@ -1,199 +1,262 @@
-       document.addEventListener('DOMContentLoaded', function() {
-        if (typeof AOS !== 'undefined') {
-                AOS.init({ 
-                    duration: 800, 
-                    once: true, 
-                    offset: 50, 
-                    easing: 'ease-out-cubic' 
-                });
-            } else {
-                console.warn('AOS library not loaded');
+// تابع Lazy Load برای QRCode.js
+function loadQRCode() {
+    if (window.QRCode) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+        script.crossOrigin = 'anonymous';
+        script.onload = () => {
+            console.log('QRCode.js loaded');
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('Failed to load QRCode.js');
+            reject(new Error('QRCode library failed to load'));
+        };
+        document.head.appendChild(script);
+    });
+}
+
+// تابع انیمیشن اسکرول (جایگزین AOS)
+function initScrollAnimations() {
+    const animateOnScroll = () => {
+        document.querySelectorAll('[data-aos]').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.8 && !el.classList.contains('aos-animate')) {
+                el.classList.add('aos-animate');
             }
-        const iframe = document.getElementById('remoteVideo');
-        const videoWrapperDiv = document.getElementById('video-wrapper');
-        const startButton = document.getElementById('startButton');
-        const resetButton = document.getElementById('reset-button');
-        const lanToggle = document.getElementById('lan-toggle');
-        const cleanOutputToggle = document.getElementById('cleanoutput-toggle');
-        const qrContainer = document.getElementById('qrcode-container');
-        const copyButtonText = document.getElementById('copy-link-text');
-        const obsButtonText = document.getElementById('obs-btn-text');
-        const copyButton = document.getElementById('copy-link-button');
-        const obsButton = document.getElementById('obs-btn');
+        });
+    };
 
-        // State
-        let roomId = null;
-        let mobileUrl = '';
-        let viewerUrl = '';
-        let isLanOnly = false;
-        let isCleanOutput = false;
+    // اجرای اولیه
+    animateOnScroll();
+    // اجرای در اسکرول
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                animateOnScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+}
 
-        // --- Functions ---
-        function generateRoomId() {
-            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < 32; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+// --- شروع DOM ---
+document.addEventListener('DOMContentLoaded', function () {
+    // فعال‌سازی انیمیشن‌های اسکرول
+    initScrollAnimations();
+
+    // عناصر DOM
+    const iframe = document.getElementById('remoteVideo');
+    const videoWrapperDiv = document.getElementById('video-wrapper');
+    const startButton = document.getElementById('startButton');
+    const resetButton = document.getElementById('reset-button');
+    const lanToggle = document.getElementById('lan-toggle');
+    const cleanOutputToggle = document.getElementById('cleanoutput-toggle');
+    const qrContainer = document.getElementById('qrcode-container');
+    const copyButtonText = document.getElementById('copy-link-text');
+    const obsButtonText = document.getElementById('obs-btn-text');
+    const copyButton = document.getElementById('copy-link-button');
+    const obsButton = document.getElementById('obs-btn');
+
+    // وضعیت
+    let roomId = null;
+    let mobileUrl = '';
+    let viewerUrl = '';
+    let isLanOnly = false;
+    let isCleanOutput = false;
+
+    // --- توابع کمکی ---
+    function generateRoomId() {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 32; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function updateUrls() {
+        const lanParam = isLanOnly ? '&lanonly' : '';
+        const cleanParam = isCleanOutput ? '&cleanoutput' : '';
+        const retryParam = '&retry=30';
+        mobileUrl = `https://live.remotevm.ir/?push=${roomId}&webcam&hideheader${lanParam}${cleanParam}${retryParam}`;
+        viewerUrl = `https://live.remotevm.ir/?view=${roomId}&autostart${cleanParam}&hideheader${lanParam}${retryParam}`;
+    }
+
+    function animateButtonSuccess(button, originalText) {
+        button.classList.add('success-animation');
+        setTimeout(() => {
+            button.classList.remove('success-animation');
+            if (originalText) {
+                button.querySelector('span').innerText = originalText;
             }
-            return result;
-        }
+        }, 500);
+    }
 
-        function updateUrls() {
-            const lanParam = isLanOnly ? '&lanonly' : '';
-            const cleanParam = isCleanOutput ? '&cleanoutput' : '';
-            const retryParam = '&retry=30';
-            mobileUrl = `https://live.remotevm.ir/?push=${roomId}&webcam&hideheader${lanParam}${cleanParam}${retryParam}`;
-            viewerUrl = `https://live.remotevm.ir/?view=${roomId}&autostart${cleanParam}&hideheader${lanParam}${retryParam}`;
-        }
-
-        function animateButtonSuccess(button, originalText) {
-            button.classList.add('success-animation');
-            setTimeout(() => {
-                button.classList.remove('success-animation');
-                if (originalText) {
-                    button.querySelector('span').innerText = originalText;
-                }
-            }, 500);
-        }
-
-        function startSession() {
+    // --- شروع جلسه ---
+    async function startSession() {
+        try {
             startButton.disabled = true;
             startButton.style.opacity = '0.5';
+
+            // لود دینامیک QRCode.js
+            await loadQRCode();
+
             roomId = generateRoomId();
-            isLanOnly = false;
-            isCleanOutput = false;
-            lanToggle.checked = false;
-            cleanOutputToggle.checked = false;
+            isLanOnly = lanToggle.checked = false;
+            isCleanOutput = cleanOutputToggle.checked = false;
             updateUrls();
 
+            // تولید QR Code
             qrContainer.innerHTML = '';
             new QRCode(qrContainer, {
-                text: mobileUrl, 
-                width: 220, 
+                text: mobileUrl,
+                width: 220,
                 height: 220,
-                colorDark: '#0f172a', 
+                colorDark: '#0f172a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.H
             });
 
+            // بارگذاری iframe
             iframe.src = viewerUrl;
 
+            // تغییر UI
             document.getElementById('initial-state').classList.add('hidden');
             document.getElementById('qr-state').classList.remove('hidden');
             videoWrapperDiv.classList.remove('hidden');
-            
-            // Smooth scroll to QR code
+
+            // اسکرول نرم به QR
             setTimeout(() => {
                 document.getElementById('qr-state').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
+
+        } catch (err) {
+            console.error('خطا در شروع جلسه:', err);
+            alert('خطا در بارگذاری. لطفاً صفحه را رفرش کنید.');
+            resetSession();
         }
+    }
 
-        function resetSession() {
-            iframe.src = 'about:blank';
-            roomId = null; 
-            mobileUrl = ''; 
-            viewerUrl = '';
-            copyButtonText.innerText = 'کپی لینک';
-            obsButtonText.innerText = 'کپی لینک OBS';
-            document.getElementById('initial-state').classList.remove('hidden');
-            document.getElementById('qr-state').classList.add('hidden');
-            videoWrapperDiv.classList.add('hidden');
-            startButton.disabled = false;
-            startButton.style.opacity = '1';
-            
-            // Smooth scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    // --- ریست جلسه ---
+    function resetSession() {
+        iframe.src = 'about:blank';
+        roomId = null;
+        mobileUrl = '';
+        viewerUrl = '';
+        copyButtonText.innerText = 'کپی لینک';
+        obsButtonText.innerText = 'کپی لینک OBS';
 
-        function regenerateQR() {
-            qrContainer.innerHTML = '';
-            new QRCode(qrContainer, {
-                text: mobileUrl, 
-                width: 220, 
-                height: 220,
-                colorDark: '#0f172a', 
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            iframe.src = viewerUrl;
-        }
+        document.getElementById('initial-state').classList.remove('hidden');
+        document.getElementById('qr-state').classList.add('hidden');
+        videoWrapperDiv.classList.add('hidden');
 
-        // --- Event Listeners ---
-        startButton.addEventListener('click', startSession);
-        resetButton.addEventListener('click', resetSession);
+        startButton.disabled = false;
+        startButton.style.opacity = '1';
 
-        lanToggle.addEventListener('change', function() {
-            if (!roomId) return;
-            isLanOnly = this.checked;
-            updateUrls();
-            regenerateQR();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- بازتولید QR ---
+    function regenerateQR() {
+        if (!roomId || !window.QRCode) return;
+
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+            text: mobileUrl,
+            width: 220,
+            height: 220,
+            colorDark: '#0f172a',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
         });
+        iframe.src = viewerUrl;
+    }
 
-        cleanOutputToggle.addEventListener('change', function() {
-            if (!roomId) return;
-            isCleanOutput = this.checked;
-            updateUrls();
-            regenerateQR();
-        });
+    // --- رویدادها ---
+    startButton.addEventListener('click', startSession);
+    resetButton.addEventListener('click', resetSession);
 
-        copyButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(mobileUrl).then(() => {
-                const originalText = copyButtonText.innerText;
-                copyButtonText.innerText = 'کپی شد! ✓';
-                animateButtonSuccess(copyButton, originalText);
-                setTimeout(() => copyButtonText.innerText = originalText, 2000);
-            });
-        });
+    lanToggle.addEventListener('change', function () {
+        if (!roomId) return;
+        isLanOnly = this.checked;
+        updateUrls();
+        regenerateQR();
+    });
 
-        obsButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(viewerUrl).then(() => {
-                const originalText = obsButtonText.innerText;
-                obsButtonText.innerText = 'کپی شد! ✓';
-                animateButtonSuccess(obsButton, originalText);
-                setTimeout(() => obsButtonText.innerText = originalText, 2000);
-            });
-        });
+    cleanOutputToggle.addEventListener('change', function () {
+        if (!roomId) return;
+        isCleanOutput = this.checked;
+        updateUrls();
+        regenerateQR();
+    });
 
-        document.getElementById('fullscreen-btn').addEventListener('click', () => {
-            const container = document.getElementById('video-container');
-            if (container.requestFullscreen) container.requestFullscreen();
-            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-            else if (container.msRequestFullscreen) container.msRequestFullscreen();
-        });
-
-        // Menu
-        const menuToggle = document.getElementById('menu-toggle');
-        const menuPanel = document.getElementById('menu-panel');
-        const menuOverlay = document.getElementById('menu-overlay');
-        const menuIcon = document.getElementById('menu-icon');
-
-        function toggleMenu() {
-            const isOpen = !menuPanel.classList.contains('translate-x-full');
-            
-            if (isOpen) {
-                // Close menu
-                menuPanel.classList.add('translate-x-full');
-                menuPanel.classList.remove('translate-x-0');
-                menuOverlay.classList.add('hidden', 'opacity-0');
-                menuIcon.classList.add('fa-bars');
-                menuIcon.classList.remove('fa-times');
-            } else {
-                // Open menu
-                menuPanel.classList.remove('translate-x-full');
-                menuPanel.classList.add('translate-x-0');
-                menuOverlay.classList.remove('hidden', 'opacity-0');
-                menuIcon.classList.remove('fa-bars');
-                menuIcon.classList.add('fa-times');
-            }
-        }
-
-        menuToggle.addEventListener('click', toggleMenu);
-        menuOverlay.addEventListener('click', toggleMenu);
-
-        // ESC key to close menu
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !menuPanel.classList.contains('translate-x-full')) {
-                toggleMenu();
-            }
+    copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(mobileUrl).then(() => {
+            const originalText = copyButtonText.innerText;
+            copyButtonText.innerText = 'کپی شد! Checkmark';
+            animateButtonSuccess(copyButton, originalText);
+            setTimeout(() => copyButtonText.innerText = originalText, 2000);
+        }).catch(() => {
+            alert('کپی کردن ناموفق بود. لطفاً دستی کپی کنید.');
         });
     });
+
+    obsButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(viewerUrl).then(() => {
+            const originalText = obsButtonText.innerText;
+            obsButtonText.innerText = 'کپی شد! Checkmark';
+            animateButtonSuccess(obsButton, originalText);
+            setTimeout(() => obsButtonText.innerText = originalText, 2000);
+        }).catch(() => {
+            alert('کپی کردن ناموفق بود. لطفاً دستی کپی کنید.');
+        });
+    });
+
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        const container = document.getElementById('video-container');
+        const requestFull = container.requestFullscreen ||
+            container.webkitRequestFullscreen ||
+            container.msRequestFullscreen ||
+            container.mozRequestFullScreen;
+
+        if (requestFull) requestFull.call(container);
+    });
+
+    // --- منوی همبرگری ---
+    const menuToggle = document.getElementById('menu-toggle');
+    const menuPanel = document.getElementById('menu-panel');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuIcon = document.getElementById('menu-icon');
+
+    function toggleMenu() {
+        const isOpen = !menuPanel.classList.contains('translate-x-full');
+
+        if (isOpen) {
+            menuPanel.classList.add('translate-x-full');
+            menuPanel.classList.remove('translate-x-0');
+            menuOverlay.classList.add('hidden', 'opacity-0');
+            menuIcon.classList.add('fa-bars');
+            menuIcon.classList.remove('fa-times');
+        } else {
+            menuPanel.classList.remove('translate-x-full');
+            menuPanel.classList.add('translate-x-0');
+            menuOverlay.classList.remove('hidden', 'opacity-0');
+            menuIcon.classList.remove('fa-bars');
+            menuIcon.classList.add('fa-times');
+        }
+    }
+
+    menuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !menuPanel.classList.contains('translate-x-full')) {
+            toggleMenu();
+        }
+    });
+});
