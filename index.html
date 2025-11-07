@@ -1,118 +1,217 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>انتقال تصویر دوربین موبایل | Remote VM Live</title>
-    <meta name="description" content="ابزار آنلاین و رایگان برای انتقال تصویر زنده دوربین موبایل به کامپیوتر با کد QR.">
-    <link rel="icon" type="image/png" href="favicon.png">
+<!DOCTYPE html><html lang="fa" dir="rtl" class="scroll-smooth"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"> <title>انتقال تصویر دوربین موبایل | Remote VM Live</title> <meta name="description" content="ابزار آنلاین و رایگان برای انتقال تصویر زنده دوربین موبایل به کامپیوتر از طریق مرورگر با استفاده از کد QR و بدون نیاز به نصب نرم‌افزار."> <link rel="icon" type="image/png" href="favicon.png">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <meta property="og:title" content="انتقال تصویر دوربین موبایل | Remote VM Live">
-    <meta property="og:description" content="دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید.">
-    <meta property="og:url" content="https://live.remotevm.ir"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    
-    <header>
-        <button id="menu-toggle" class="menu-toggle" aria-label="باز کردن منو">
-            <i id="menu-icon" class="fas fa-bars" aria-hidden="true"></i>
-        </button>
-        <div id="menu-overlay" class="menu-overlay hidden opacity-0"></div>
-        <nav id="menu-panel" class="menu-panel">
-            <div class="menu-content">
-                <h2>منو</h2>
-                <ul>
-                    <li><a href="https://remotevm.ir" target="_blank"><i class="fas fa-home"></i>خانه</a></li>
-                    <li><a href="https://call.remotevm.ir" target="_blank"><i class="fas fa-video"></i>تماس تصویری</a></li>
-                    <li><a href="https://about.remotevm.ir" target="_blank"><i class="fas fa-info-circle"></i>درباره ما</a></li>
-                    <li><a href="https://room.remotevm.ir" target="_blank"><i class="fas fa-users-cog"></i>پنل حرفه ای</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <main class="main-container">
-        <div id="initial-state" class="state-container" data-aos="zoom-in">
-            <div class="icon-wrapper">
-                <i class="fas fa-mobile-screen-button"></i>
+<!-- Google Fonts: Vazirmatn -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- AOS Animation -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="./css/style.css">
+<!-- QR Code Generator -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+
+</head> <body>
+<!-- Header & Menu -->
+<header>
+    <button id="menu-toggle" class="fixed top-5 right-5 z-50 h-12 w-12 rounded-full text-cyan-400 text-xl flex items-center justify-center">
+        <i id="menu-icon" class="fas fa-bars transition-transform duration-300"></i>
+    </button>
+    <div id="menu-overlay" class="fixed inset-0 bg-black/60 z-30 transition-opacity opacity-0 hidden backdrop-blur-sm"></div>
+    <nav id="menu-panel" class="fixed top-0 right-0 h-full w-72 border-l border-slate-700 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="p-6 h-full flex flex-col">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">منو</h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full"></div>
             </div>
-            <h1>انتقال تصویر دوربین موبایل</h1>
-            <p>دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید.</p>
-            <button id="startButton" class="btn-neon btn-neon-cyan">
-                <i class="fas fa-play"></i>
-                <span>Start</span>
-            </button>
+            <ul class="flex flex-col space-y-2 flex-1">
+                <li><a href="https://remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-300"><i class="fas fa-home w-6 text-center"></i>خانه</a></li>
+                <li><a href="https://call.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-300"><i class="fas fa-video w-6 text-center"></i>تماس تصویری</a></li>
+                <li><a href="https://about.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-300"><i class="fas fa-info-circle w-6 text-center"></i>درباره ما</a></li>
+                <li><a href="https://room.remotevm.ir" target="_blank" class="flex items-center gap-4 text-lg text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-300"><i class="fas fa-users-cog w-6 text-center"></i>پنل حرفه‌ای</a></li>
+            </ul>
+            <div class="pt-6 border-t border-slate-700">
+                <p class="text-sm text-slate-500 text-center">نسخه 2.0.0</p>
+            </div>
         </div>
+    </nav>
+</header>
 
-        <div id="qr-state" class="state-container card hidden" data-aos="fade-up">
-            <h2>مرحله ۱: اسکن کد QR</h2>
-            <div class="qr-grid">
-                <div class="qr-code-section" data-aos="fade-left">
-                    <div id="qrcode-container-wrapper">
-                        <div id="qrcode-container"></div>
-                    </div>
-                    <div class="button-group">
-                        <button id="copy-link-button" class="btn-neon btn-neon-cyan">
+<!-- Main Content -->
+<main class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
+
+    <!-- Initial State -->
+    <div id="initial-state" class="text-center transition-all duration-500" data-aos="zoom-in">
+        <div class="mb-8">
+            <i class="fas fa-mobile-screen-button text-8xl text-cyan-400 icon-pulse"></i>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">
+            انتقال تصویر دوربین موبایل
+        </h1>
+        <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+            دوربین موبایل خود را بدون نیاز به هیچ نرم‌افزاری به یک وب‌کم بی‌سیم تبدیل کنید
+        </p>
+        <button id="startButton" class="btn-neon btn-neon-cyan text-lg py-4 px-8">
+            <i class="fas fa-play"></i>
+            <span>شروع کنید</span>
+        </button>
+    </div>
+
+    <!-- QR Code State -->
+    <div id="qr-state" class="hidden w-full max-w-5xl transition-all duration-500">
+        <div class="glass-card rounded-3xl p-6 md:p-10 text-center">
+            <h2 class="text-2xl md:text-4xl font-bold text-white mb-8 flex items-center justify-center gap-3">
+                <span class="text-cyan-400">مرحله ۱:</span>
+                <span>اسکن کد QR</span>
+            </h2>
+            <div class="grid lg:grid-cols-2 gap-10 items-start">
+                <!-- QR & Buttons -->
+                <div class="space-y-6" data-aos="fade-left">
+                    <div id="qrcode-container" class="inline-block"></div>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button id="copy-link-button" class="btn-neon btn-neon-cyan flex-1">
                             <i class="fas fa-copy"></i>
                             <span id="copy-link-text">کپی لینک</span>
                         </button>
-                        <button id="reset-button" class="btn-neon btn-neon-rose">
+                        <button id="reset-button" class="btn-neon btn-neon-rose flex-1">
                             <i class="fas fa-redo"></i>
                             <span>شروع مجدد</span>
                         </button>
                     </div>
+                    <div class="text-sm text-slate-400 flex items-center justify-center gap-2">
+                        <i class="fas fa-shield-alt text-green-400"></i>
+                        <span>اتصال امن و رمزگذاری شده</span>
+                    </div>
                 </div>
-                <div class="instructions-section" data-aos="fade-right">
-                    <h3>دستورالعمل اتصال:</h3>
-                    <div class="instruction-item">
-                        <i class="fas fa-qrcode"></i>
-                        <div>
-                            <h4>۱. اسکن کد QR</h4>
-                            <p class="small-text">کد QR مقابل را با دوربین موبایل خود اسکن کرده و لینک باز شده را دنبال کنید.</p>
+
+                <!-- Instructions -->
+                <div class="text-right space-y-4" data-aos="fade-right">
+                    <h3 class="text-xl font-semibold text-cyan-400 mb-6 flex items-center gap-3">
+                        <i class="fas fa-list-check"></i>
+                        دستورالعمل اتصال
+                    </h3>
+
+                    <!-- Steps -->
+                    <div class="space-y-3">
+                        <!-- Step 1 -->
+                        <div class="step-card">
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan-400 text-2xl"><i class="fas fa-qrcode"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-white mb-1">۱. اسکن کد QR</h4>
+                                    <p class="text-slate-400 text-sm">کد QR را با دوربین موبایل اسکن کنید</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="instruction-item">
-                        <i class="fas fa-camera"></i>
-                        <div>
-                            <h4>۲. اجازه دسترسی</h4>
-                            <p class="small-text">در صفحه‌ای که روی موبایل شما باز می‌شود، اجازه دسترسی به دوربین و میکروفون را بدهید.</p>
+
+                        <!-- Step 2 -->
+                        <div class="step-card">
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan-400 text-2xl"><i class="fas fa-camera"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-white mb-1">۲. اجازه دسترسی</h4>
+                                    <p class="text-slate-400 text-sm">به دوربین و میکروفون اجازه دسترسی دهید</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="instruction-item">
-                        <i class="fas fa-wifi animate-pulse"></i>
-                        <div>
-                            <h4>۳. در حال اتصال...</h4>
-                            <p class="small-text">منتظر بمانید. تصویر دوربین شما به زودی در کادر پایین نمایش داده خواهد شد.</p>
+
+                        <!-- Step 3 -->
+                        <div class="step-card">
+                            <div class="flex items-start gap-4">
+                                <div class="text-cyan-400 text-2xl">
+                                    <i class="fas fa-wifi"></i>
+                                    <div class="loading-dots mt-2">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white mb-1">۳. در حال اتصال</h4>
+                                    <p class="text-slate-400 text-sm">تصویر به زودی نمایش داده می‌شود</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 - LAN -->
+                        <div class="step-card">
+                            <div class="flex items-start gap-4">
+                                <div class="text-purple-400 text-2xl"><i class="fas fa-network-wired"></i></div>
+                                <div class="w-full">
+                                    <h4 class="font-bold text-white mb-2">۴. شبکه محلی (اختیاری)</h4>
+                                    <p class="text-slate-400 text-sm mb-3">برای اتصال بدون اینترنت در Wi-Fi مشترک</p>
+                                    <div class="tooltip">
+                                        <label class="switch">
+                                            <input type="checkbox" id="lan-toggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                        <span class="text-xs text-slate-500">حالت LAN</span>
+                                        <span class="tooltiptext">فعال‌سازی حالت شبکه محلی — فقط در Wi-Fi مشترک کار می‌کند</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5 - UI-less -->
+                        <div class="step-card">
+                            <div class="flex items-start gap-4">
+                                <div class="text-purple-400 text-2xl"><i class="fas fa-eye-slash"></i></div>
+                                <div class="w-full">
+                                    <h4 class="font-bold text-white mb-2">۵. حالت Clean (OBS)</h4>
+                                    <p class="text-slate-400 text-sm mb-3">نمایش تصویر بدون رابط کاربری</p>
+                                    <div class="tooltip">
+                                        <label class="switch">
+                                            <input type="checkbox" id="cleanoutput-toggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                        <span class="text-xs text-slate-500">حالت Clean</span>
+                                        <span class="tooltiptext">حذف کامل رابط کاربری — مناسب برای OBS و استریم</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div id="video-wrapper" class="video-wrapper hidden" data-aos="zoom-in-up">
-            <div id="video-container" class="video-container">
-                <iframe id="remoteVideo" allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;"></iframe>
-            </div>
-            <div id="video-controls" class="video-controls">
-                <button id="fullscreen-btn" class="btn-neon btn-neon-cyan">
-                    <i class="fas fa-expand"></i><span>تمام‌صفحه</span>
-                </button>
-                <button id="obs-btn" class="btn-neon btn-neon-cyan">
-                    <i class="fab fa-obs"></i><span id="obs-btn-text">کپی لینک OBS</span>
-                </button>
-            </div>
+    </div>
+
+    <!-- Video Player -->
+    <div id="video-wrapper" class="hidden w-full max-w-5xl mt-10 transition-all duration-500">
+        <div id="video-container" class="relative aspect-video rounded-2xl overflow-hidden border-2 border-slate-700" data-aos="zoom-in-up">
+            <iframe id="remoteVideo" allow="autoplay;camera;microphone;fullscreen;picture-in-picture;display-capture;" class="w-full h-full border-0"></iframe>
         </div>
-    </main>
-    
-    <footer>
-        <p>سرویس اختصاصی <a href="https://remotevm.ir" target="_blank">RemoteVM</a></p>
-    </footer>
+        <div id="video-controls" class="mt-6 flex flex-wrap items-center justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+            <button id="fullscreen-btn" class="btn-neon btn-neon-cyan">
+                <i class="fas fa-expand"></i>
+                <span>تمام‌صفحه</span>
+            </button>
+            <button id="obs-btn" class="btn-neon btn-neon-cyan">
+                <i class="fab fa-obs"></i>
+                <span id="obs-btn-text">کپی لینک OBS</span>
+            </button>
+        </div>
+    </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
-    <script src="js/main.js" defer></script>
-</body>
+<!-- Footer -->
+<footer class="text-center py-8 text-slate-400 text-sm relative z-10">
+    <div class="flex items-center justify-center gap-2 mb-2">
+        <span>قدرت گرفته از</span>
+        <a href="https://remotevm.ir" class="text-cyan-400 hover:text-cyan-300 transition-colors font-semibold" target="_blank">RemoteVM</a>
+    </div>
+    <p class="text-xs text-slate-500">© 2024 تمامی حقوق محفوظ است</p>
+</footer>
 
-</html>
+<!-- AOS JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+
+<script src="js/main.js" defer></script>
+</body> </html>
