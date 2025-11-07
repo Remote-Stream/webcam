@@ -1,7 +1,14 @@
-    AOS.init({ duration: 800, once: true, offset: 50, easing: 'ease-out-cubic' });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Elements
+       document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AOS !== 'undefined') {
+                AOS.init({ 
+                    duration: 800, 
+                    once: true, 
+                    offset: 50, 
+                    easing: 'ease-out-cubic' 
+                });
+            } else {
+                console.warn('AOS library not loaded');
+            }
         const iframe = document.getElementById('remoteVideo');
         const videoWrapperDiv = document.getElementById('video-wrapper');
         const startButton = document.getElementById('startButton');
